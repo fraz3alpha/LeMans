@@ -1,0 +1,237 @@
+<html>
+<head>
+<style type="text/css">
+table {
+	border-collapse:collapse;
+	border: 1px solid black;
+}
+td {
+	padding:4px;
+}
+th {
+	background-color: #FFFFFF;
+}
+tr.even {
+	background-color: #000000; 
+	color: #FFFF00;
+}
+td.out {
+	background-color: #FF9900;
+}
+td.pit {
+	background-color: #FF0000;
+}
+ 
+tr.odd {
+	background-color: #222222; 
+	color: #FFFF00;
+}
+td.position {
+	color: #FFFFFF;
+}
+td.pits {
+	color: #FFFFFF;
+}
+td.fastest {
+	color: #00CC00;
+}
+td.cat_nt {
+	color: #FFFFFF;
+}
+td.cat_lmp1 {
+	color: #FF0000;
+}
+td.cat_lmp2 {
+	color: #0000FF;
+}
+td.cat_lmgtepro {
+	color: #00CC00;
+}
+td.cat_lmgteam {
+	color: #FF9900;
+}
+</style>
+<script src='http://code.jquery.com/jquery-latest.min.js' type='text/javascript'></script>
+<script type="text/javascript" src="http://live.fiawec.com/wpphpFichiers/1/live/referentiel.js"></script>
+
+<script type="text/javascript">
+//	var key_lap = -1;
+//	var key_best_lap = 10;
+//	var key_last_lap = 1;
+//	var key_pits = -1;
+//	var key_max_speed = -1;
+//	var key_tyre = 9;
+//	var key_car_number = -1;
+//	var key_car = -1;
+//	var key_driver = 0;
+//	var key_category = -1;
+//	var key_engages = 7;
+
+	var key_laps = 2;			//
+	var key_best_lap = 5;		//
+	var key_last_lap = 6;		//
+	var key_gap = 4;			//
+	var key_pits = 7;			//
+	var key_max_speed = 8;		//
+	var key_tyre = 10;			//
+	var key_car_number = -1;
+	var key_car = -1;
+	var key_driver = 0;			//
+	var key_category = -1;
+	var key_engages = 9;		//
+	var key_position = 1;		//
+
+	var positions = ["","","Run","Out","Pit"];
+	
+</script>
+<script type="text/javascript">
+
+	$(document).ready(function() {
+	// do stuff when DOM is ready
+	
+		var url_data = 'http://live.lemans-tv.com/proxy.html?file=1/live/data.js';
+	
+		getLocalJson();
+		//getRemoteJson();
+		//worker();
+
+	});
+
+	// Wrap this function in a closure so we don't pollute the namespace
+	function worker() {
+	  $.ajax({
+	    url: 'data/data.js', 
+	    success: function(data) {
+		    console.log(data);
+	      
+	    },
+	    complete: function() {
+	      setTimeout(worker, 5000);
+	    }
+	  });
+	}
+	
+	function getLocalJson() {
+		console.log("Fetching data");
+
+		$.post('http://localhost:9616/data.js', function(data) {
+			console.log(new Date());	
+			// Look into templates for building up the table
+
+			var row = 0;
+
+			var table = '<table width="100%">';
+
+			table += '<tr>';
+			table +=  '<th> </th>';
+			table +=  '<th>State</th>';
+			table +=  '<th>Car #</th>';
+			table +=  '<th>Category</th>';
+			table +=  '<th>Car</th>';
+			table +=  '<th>Driver</th>';
+			table +=  '<th>Lap</th>';
+			table +=  '<th>Pit</th>';
+			table +=  '<th>Gap</th>';
+			table +=  '<th>Last Lap</th>';
+			table +=  '<th>Best Lap</th>';
+			table +=  '<th>Team</th>';
+			table += '</tr>';
+			row++;
+				$.each(data[1], function(key, val) {
+
+					//console.log(key);
+					//console.log(val);
+					
+					// Unknowns 1 2 3 4 7 11 12
+	//				console.log("New line:")
+//					console.log("1:" + val[1]);
+
+					var row_class = "even";
+					if (row % 2 == 1) {
+						row_class = "odd";
+					}
+					
+					table += '<tr class="'+row_class+'">';
+
+					// Calculate category
+					var v_category = "";
+					var vt_engages = val[key_engages];
+					//console.log("vt_engages " + vt_engages);
+					if (vt_engages != null) {
+						var t1 = tabEngages[vt_engages];
+						//console.log("t1 " + t1);
+						if (t1 != null) {
+							var t2 = t1["categorie"];
+							//console.log("t2 " + t2);
+							if (t2 != null) {
+								var t3 = tabCategories[t2];
+								//console.log("t3 " + t3);
+								if (t3 != null) {
+									v_category = t3["nom"];
+								}
+							}
+						}
+					}
+					//console.log(v_category);
+					//tabCategories[tabEngages[val[key_engages]]["categorie"]]["nom"];
+					
+					var v_gap = val[key_gap];
+					var v_laps = val[key_laps];
+					var v_pits = val[key_pits];
+					var v_position = positions[val[key_position]];
+					
+					var v_category_class = tabCategories[tabEngages[val[key_engages]]["categorie"]]["class"];
+					var v_driver_info = tabPilotes[val[key_driver]];
+					var v_driver = null;
+					if (v_driver_info) {
+						v_driver = v_driver_info["nom"];
+					} else {
+						v_driver = "";
+					}
+					//console.log(key)
+					//console.log(val);
+					//console.log(tabEngages[val[key_engages]]);
+					table += '  <td class="position">'+key+'</td>';
+					table += '  <td class="'+v_position+'">'+v_position+'</td>';
+					table += '  <td>'+tabEngages[val[key_engages]]["num"]+'</td>';
+					table += '  <td class="'+v_category_class+'">'+v_category+'</td>';
+					table += '  <td>'+tabVehicules[tabEngages[val[key_engages]]["voiture"]]["nom"]+'</td>';
+					table += '  <td>'+v_driver+'</td>';
+
+					table += '  <td>'+v_laps+'</td>';
+					table += '  <td class="pits">'+v_pits+'</td>';
+					table += '  <td>'+v_gap+'</td>';
+					if (val[key_last_lap] == val[key_best_lap]) {
+						table += '  <td class="fastest">'+val[key_last_lap]+'</td>';
+					} else {
+						table += '  <td>'+val[key_last_lap]+'</td>';
+					}
+					table += '  <td>'+val[key_best_lap]+'</td>';
+					table += '  <td>'+tabTeams[tabEngages[val[key_engages]]["team"]]["nom"]+'</td>';
+
+					table += '</tr>';
+
+					row++;
+				});
+
+				table += '</table>';
+
+				$('.main_table').html(table);
+
+				//$.getJSON('data/data.js', this
+
+		}, 'json');
+		
+		setTimeout(getLocalJson, 5000);
+
+	}
+
+
+</script>
+</head>
+
+<body bgcolor="black">
+<div class="main_table"></div>
+<div class="result"></div>
+</body>
+</html>
