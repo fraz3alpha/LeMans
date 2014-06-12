@@ -1,0 +1,10 @@
+{
+"nodes": {
+  "0": "default.html",
+  "1": "twitter-baekdal-lemans.html",
+  "2": "radiolemans.html"
+},
+"server": {
+  "html": "../html"
+}
+}
