@@ -67,6 +67,8 @@ http.createServer(function (req, res) {
 
 }).listen(9615);
 
+console.log("Server running on port 9615")
+
 function page_main(res) {
   res.write("<html><body>")
   res.write("This is the main page<br>")
