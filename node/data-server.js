@@ -11,6 +11,8 @@ var content_encoding = null
 
 function PostCode() {
 
+// Example cURL from Chrome webpage: curl 'http://live.fiawec.com/proxy.php?i=&t=&file=1/live/data.js' -X POST -H 'Cookie: __utma=203182604.1037311345.1402603651.1402606580.1402613069.3; __utmb=203182604.1.10.1402613069; __utmc=203182604; __utmz=203182604.1402603651.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)' -H 'Origin: http://live.fiawec.com' -H 'Accept-Encoding: gzip,deflate,sdch' -H 'Accept-Language: en-GB,en-US;q=0.8,en;q=0.6' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.102 Safari/537.36' -H 'Accept: application/json, text/javascript, */*; q=0.01' -H 'Referer: http://live.fiawec.com/' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' -H 'Content-Length: 0' --compressed
+
   // An object of options to indicate where to post to
   var post_options = {
       host: 'live.fiawec.com',
@@ -18,9 +20,6 @@ function PostCode() {
       path: '/proxy.php?i=&t=&file=1/live/data.js',
       method: 'POST',
       headers: {
-
-//curl 'http://live.fiawec.com/proxy.php?i=&t=&file=1/live/data.js' -X POST -H 'Cookie: __utma=203182604.1037311345.1402603651.1402606580.1402613069.3; __utmb=203182604.1.10.1402613069; __utmc=203182604; __utmz=203182604.1402603651.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)' -H 'Origin: http://live.fiawec.com' -H 'Accept-Encoding: gzip,deflate,sdch' -H 'Accept-Language: en-GB,en-US;q=0.8,en;q=0.6' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.102 Safari/537.36' -H 'Accept: application/json, text/javascript, */*; q=0.01' -H 'Referer: http://live.fiawec.com/' -H 'X-Requested-With: XMLHttpRequest' -H 'Connection: keep-alive' -H 'Content-Length: 0' --compressed
-
           'Content-Type': 'application/x-www-form-urlencoded',
           'Origin': 'http://live.fiawec.com',
           'Accept-Encoding': 'gzip,deflate,sdch',
@@ -85,30 +84,10 @@ http.createServer(function (req,res) {
                 res.setHeader(item, last_data_headers[item])
               })
               res.end(last_data, 'binary')
-/*
-   var text = "Hello World!";
-    var buf = new Buffer(text, 'utf-8');   // Choose encoding for the string.
-    zlib.gzip(buf, function (_, result) {  // The callback will give you the 
-      res.end(result, 'binary');                     // result, so just send it.
-    });
-*/
             } else { 
               console.log("Nothing to return")
               res.end()
             }
-/*
-        if (content_encoding != null) {
-            console.log("Setting content-encoding on response to " + content_encoding)
-            res.setHeader('Content-Encoding', content_encoding)
-        }
-   var text = "Hello World!";
-    var buf = new Buffer(text, 'utf-8');   // Choose encoding for the string.
-    zlib.gzip(buf, function (_, result) {  // The callback will give you the 
-      res.end(result, 'binary');                     // result, so just send it.
-    });
-   //     res.end("test")
-  //      res.end(last_data)
-*/
     }
     else if (req.url.indexOf("/livetiming.html") == 0) {
         fs.readFile("../html/livetiming.html", 'utf8', function(err, data) {
