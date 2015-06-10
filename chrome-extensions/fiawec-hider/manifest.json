@@ -1,0 +1,17 @@
+{
+    "manifest_version": 2,
+    "name": "FIAWEC hider",
+    "version": "1.0",
+    "description": "desc",
+    "browser_action": { "default_icon": "icon2.png" },
+    "permissions": [ "activeTab", "tabs", "http://*/*" ],
+    "background": {
+      "scripts": ["content.js"],
+      "persistent": false
+    },
+    "content_scripts": [ {
+        "all_frames": true,
+        "js": [ "content.js" ],
+        "matches": [ "http://*/*", "https://*/*" ] 
+    } ]
+}
