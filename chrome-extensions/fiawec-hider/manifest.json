@@ -3,7 +3,7 @@
     "name": "FIAWEC hider",
     "version": "1.0",
     "description": "desc",
-    "browser_action": { "default_icon": "icon2.png" },
+    "browser_action": { "default_icon": "icon.png" },
     "permissions": [ "activeTab", "tabs", "http://*/*" ],
     "background": {
       "scripts": ["content.js"],
