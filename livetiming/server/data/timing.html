@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Live Timing</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="timing.js"></script>
+    <script type="text/javascript">
+        var CARS_PER_ROW = 2
+        var ROW_OFFSET = 160;
+        var ROW_GAP = 70;
+        var COL_OFFSET = 60;
+        var COL_GAP = 70;
+        var CIRCLE_SIZE = 30;
+        var TEXT_SIZE = 25;
+        var classes = ["LMP1", "LMP2", "GT-PRO", "GT-AM"]
+
+        var TITLE_TEXT_LEFT_OFFSET = 20
+
+        var data = null
+        var POLL_INTERVAL = 1000
+
+
+      $(document).ready(function () {
+        get_data();
+        draw();
+      });
+
+      function get_data() {
+        console.log("Getting data");
+        url = "/data.json"
+        loadData(url, function(new_data) {
+              console.log("New data")
+              data = restructure_data(new_data);
+              update_canvas();
+            });
+        setTimeout("get_data();", POLL_INTERVAL);
+      }
+
+      function update() {
+        get_data();
+        update_canvas();
+      }
+
+      function update_canvas() {
+        console.log("Updating canvas");
+        if (data != null) {
+          console.log("Non-null data")
+          console.log(data);
+        }
+        draw()
+      }
+
+      function loadData(url, callback, params) {
+        $.ajax({
+            url:url,
+            data:params,
+            type:'get',
+            dataType: 'json',
+            cache: false,
+            success: callback
+        });
+     }
+
+
+      function draw(){
+        var canvas = document.getElementById('timing_canvas');
+        if (canvas.getContext){
+          var ctx = canvas.getContext('2d');
+/*
+          ctx.fillStyle = "rgb(200,0,0)";
+          ctx.fillRect (10, 10, 55, 50);
+
+          ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
+          ctx.fillRect (30, 30, 55, 50);
+*/
+          if (data != null) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              draw_conditions(ctx)
+              draw_cars(ctx)
+          }
+        }
+      }
+
+      function draw_conditions(ctx) {
+        colour_bak = ctx.fillStyle;
+        ctx.fillStyle = "rgb(0,0,0)";
+        ctx.font = "bold " +TEXT_SIZE + "px sans-serif";
+        console.log(ctx.font);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic baseline";
+        ctx.fillText(data["conditions"]["localtime"], TITLE_TEXT_LEFT_OFFSET, 50);
+        ctx.fillText(data["conditions"]["sessiontime"], TITLE_TEXT_LEFT_OFFSET, 80);
+        ctx.fillText(data["conditions"]["remainingtime"], TITLE_TEXT_LEFT_OFFSET, 110);
+
+        var flags = ["Off", "Green", "Red", "Chequered", "Yellow"]
+        var flag_colours = {
+            "Off" : "rgb(128,128,128)",
+            "Green": "rgb(0,255,0)",
+            "Red": "rgb(255,0,0)",
+            "Yellow": "rgb(255,255,0)",
+            "Chequered": "rgb(0,255,255)"
+        }
+        ctx.fillStyle = flag_colours[data["conditions"]["flag"]]
+        ctx.fillRect(0, ROW_OFFSET + ROW_GAP * 57/2,10000, 10000)           
+
+      }
+
+      function draw_cars(ctx) {
+        console.log("draw_cars()")
+        for (position in data["positions"]) {
+          console.log(data["positions"][position])
+          car = data["positions"][position]
+          i = position -1
+          console.log(i)
+          draw_car(ctx, i, car);
+        }
+      }
+      function draw_car(ctx, position, car) {
+        draw_car_circle(ctx, position, car["category"]);
+        draw_car_number(ctx, position, car["number"]);
+      }
+      function draw_car_number(ctx, position, num) {
+        console.log("draw_car_number() " + position + "|" + num)
+        var row = Math.floor(position / CARS_PER_ROW)
+        var col = position % CARS_PER_ROW
+
+        var centre_x = COL_OFFSET + COL_GAP * col
+        var centre_y = ROW_OFFSET + ROW_GAP * row
+        if (col == 1) {
+          centre_y += COL_GAP/2
+        }
+
+        colour_bak = ctx.fillStyle;
+        ctx.fillStyle = "rgb(255,255,255)";
+//        ctx.fillStyle = "rgb(0,0,0)";
+        ctx.font = "bold " +TEXT_SIZE + "px sans-serif";
+        console.log(ctx.font);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "alphabetic baseline";
+        var text = ""+num
+        var mText = ctx.measureText(text)
+        console.log(text)
+        console.log(mText)
+        ctx.fillText(text, centre_x, centre_y + TEXT_SIZE/2-5);
+
+        ctx.fillStyle = colour_bak;
+        
+      }
+      /*
+       * Get common colours for the LM classes  
+       */
+      function get_canvas_colour_for_class(cls) {
+        colour = "rgb(128,128,128)"
+        console.log(cls)
+        switch (cls) {
+            case "LMP1":
+            case "LM P1":
+                colour = "rgb(200, 0, 0)";
+                break;
+            case "LMP2":
+            case "LM P2":
+                colour = "rgb(0, 0, 200)";
+                break;
+            case "GT-PRO":
+            case "LM GTE Pro":
+                colour = "rgb(0, 153, 0)";
+                break;
+            case "GT-AM":
+            case "LM GTE Am":
+                colour = "rgb(255, 153, 0)";
+                break;
+         }
+         return colour;
+      }
+      /*
+       * Draw an appropriately coloured circle for the given class
+       */
+      function draw_car_circle(ctx, position, cls) {
+        console.log("draw_car_circle() " + position + "|"+cls)
+        colour = get_canvas_colour_for_class(cls);
+        colour_bak = ctx.fillStyle;
+        ctx.fillStyle = colour;
+        draw_circle(ctx, position)
+        ctx.fillStyle = colour_bak;
+
+      }
+      function draw_circle(ctx, position) {
+
+        var row = Math.floor(position / CARS_PER_ROW)
+        var col = position % CARS_PER_ROW
+
+        console.log("Position: "+position+ " Row: "+row+ " Col: "+col)
+
+        var circle = new Path2D();
+        circle.moveTo(COL_OFFSET + COL_GAP * col, ROW_OFFSET + ROW_GAP * row);
+        centre_x = COL_OFFSET + COL_GAP * col
+        centre_y = ROW_OFFSET + ROW_GAP * row
+        if (col == 1) {
+          centre_y += COL_GAP/2
+        }
+        circle.arc(centre_x, centre_y, CIRCLE_SIZE, 0, 2 * Math.PI);
+        ctx.fill(circle)
+      }
+    </script>
+    <style type="text/css">
+      canvas { border: 1px solid black; }
+    </style>
+  </head>
+   <body>
+    <canvas id="timing_canvas" width="1400" height="2500"></canvas>
+  </body>
+</html>
